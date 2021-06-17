@@ -1,5 +1,7 @@
 package br.com.senai.api.controller;
 
+import br.com.senai.api.assembler.PessoaAssembler;
+import br.com.senai.api.model.PessoaModel;
 import br.com.senai.domain.model.Pessoa;
 import br.com.senai.domain.repository.PessoaRepository;
 import br.com.senai.domain.service.PessoaService;
@@ -15,45 +17,36 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/pessoas")
-public class
-PessoaController {
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
+public class PessoaController {
 
     @Autowired
-    private PessoaRepository pessoaRepository;
     private PessoaService pessoaService;
+    private PessoaAssembler pessoaAssembler;
 
     @GetMapping()
     public List<Pessoa> listar() {
-//        return entityManager.createQuery("FROM Pessoa", Pessoa.class).getResultList();
-        return pessoaRepository.findAll();
+        return pessoaService.listar();
     }
     @GetMapping("/nome/{pessoaNome}")
     public List<Pessoa> listarPorNome(@PathVariable String pessoaNome) {
-        return pessoaRepository.findByNome(pessoaNome);
+        return pessoaService.listarPorNome(pessoaNome);
     }
     @GetMapping("/nome/containing/{nomeContaining}")
     public List<Pessoa> listarNomeContaining(@PathVariable String nomeContaining) {
-        return pessoaRepository.findByNomeContaining(nomeContaining);
+        return pessoaService.listarNomeContaining(nomeContaining);
     }
 
     @GetMapping("{pessoaId}")
-    public ResponseEntity<Pessoa> buscar(@PathVariable Long pessoaId) {
-//        Optional<Pessoa> pessoa = pessoaRepository.findById(pessoaId);
-//        if(pessoa.isPresent()) {
-//            return ResponseEntity.ok(pessoa.get());
-//        }
-//        return ResponseEntity.notFound().build();
-        return pessoaRepository.findById(pessoaId)
-                .map(pessoa -> ResponseEntity.ok(pessoa))
-                .orElse(ResponseEntity.notFound().build());
+    public Pessoa buscar(@PathVariable Long pessoaId) {
+        return pessoaService.buscar(pessoaId);
     }
 
     @PostMapping
-    public Pessoa cadastrar(@Valid @RequestBody Pessoa pessoa) {
-        return pessoaService.cadastrar(pessoa);
+    public PessoaModel cadastrar(@Valid @RequestBody Pessoa pessoas) {
+        Pessoa novaPessoa = pessoaAssembler.toEntity(pessoas);
+        Pessoa pessoa = pessoaService.cadastrar(novaPessoa);
+
+        return pessoaAssembler.toModel(pessoa);
     }
 
     @PutMapping("/{pessoaId}")
@@ -61,24 +54,11 @@ PessoaController {
             @Valid @PathVariable Long pessoaId,
             @RequestBody Pessoa pessoa
     ){
-        if(!pessoaRepository.existsById(pessoaId)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        pessoa.setId(pessoaId);
-        pessoa = pessoaRepository.save(pessoa);
-
-        return ResponseEntity.ok(pessoa);
+            return pessoaService.editar(pessoaId, pessoa);
     }
 
     @DeleteMapping("/{pessoaId}")
     public ResponseEntity<Pessoa> remover(@PathVariable Long pessoaId){
-
-        if(!pessoaRepository.existsById(pessoaId)) {
-            return ResponseEntity.notFound().build();
-        }
-        pessoaService.excluir(pessoaId);
-
-        return ResponseEntity.noContent().build();
+        return pessoaService.remover(pessoaId);
     }
 }
