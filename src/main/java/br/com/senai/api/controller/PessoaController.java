@@ -2,8 +2,8 @@ package br.com.senai.api.controller;
 
 import br.com.senai.api.assembler.PessoaAssembler;
 import br.com.senai.api.model.PessoaModel;
+import br.com.senai.api.model.input.PessoaInput;
 import br.com.senai.domain.model.Pessoa;
-import br.com.senai.domain.repository.PessoaRepository;
 import br.com.senai.domain.service.PessoaService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,41 +24,48 @@ public class PessoaController {
     private PessoaAssembler pessoaAssembler;
 
     @GetMapping()
-    public List<Pessoa> listar() {
+    public List<PessoaModel> listar() {
         return pessoaService.listar();
     }
+
     @GetMapping("/nome/{pessoaNome}")
-    public List<Pessoa> listarPorNome(@PathVariable String pessoaNome) {
+    public List<PessoaModel> listarPorNome(@PathVariable String pessoaNome) {
         return pessoaService.listarPorNome(pessoaNome);
     }
+
     @GetMapping("/nome/containing/{nomeContaining}")
-    public List<Pessoa> listarNomeContaining(@PathVariable String nomeContaining) {
+    public List<PessoaModel> listarNomeContaining(@PathVariable String nomeContaining) {
         return pessoaService.listarNomeContaining(nomeContaining);
     }
 
-    @GetMapping("{pessoaId}")
-    public Pessoa buscar(@PathVariable Long pessoaId) {
-        return pessoaService.buscar(pessoaId);
+    @GetMapping("/{pessoaId}")
+    public ResponseEntity<PessoaModel> procurar(@PathVariable long pessoaId){
+        return pessoaService.procurar(pessoaId);
     }
 
+    //
     @PostMapping
-    public PessoaModel cadastrar(@Valid @RequestBody Pessoa pessoas) {
-        Pessoa novaPessoa = pessoaAssembler.toEntity(pessoas);
+    public PessoaModel cadastrar(@Valid @RequestBody PessoaInput pessoaInput) {
+        Pessoa novaPessoa = pessoaAssembler.toEntity(pessoaInput);
         Pessoa pessoa = pessoaService.cadastrar(novaPessoa);
 
         return pessoaAssembler.toModel(pessoa);
     }
 
+    //passar pessoainput
     @PutMapping("/{pessoaId}")
-    public ResponseEntity<Pessoa> editar(
-            @Valid @PathVariable Long pessoaId,
-            @RequestBody Pessoa pessoa
-    ){
-            return pessoaService.editar(pessoaId, pessoa);
+    public PessoaModel editar(@Valid @RequestBody PessoaInput pessoaInput, @PathVariable long pessoaId){
+        Pessoa novaPessoa = pessoaAssembler.toEntity(pessoaInput);
+        ResponseEntity<Pessoa> pessoaResponseEntity = pessoaService.editar(pessoaId, novaPessoa);
+
+        return pessoaAssembler.toModel(pessoaResponseEntity.getBody());
     }
 
     @DeleteMapping("/{pessoaId}")
-    public ResponseEntity<Pessoa> remover(@PathVariable Long pessoaId){
-        return pessoaService.remover(pessoaId);
+    public ResponseEntity<Pessoa> remover(@Valid @PathVariable long pessoaId) {
+
+        pessoaService.excluir(pessoaId);
+
+        return ResponseEntity.noContent().build();
     }
 }

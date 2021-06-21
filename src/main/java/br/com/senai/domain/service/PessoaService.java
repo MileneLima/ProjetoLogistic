@@ -1,5 +1,7 @@
 package br.com.senai.domain.service;
 
+import br.com.senai.api.assembler.PessoaAssembler;
+import br.com.senai.api.model.PessoaModel;
 import br.com.senai.domain.exception.NegocioException;
 import br.com.senai.domain.model.Pessoa;
 import br.com.senai.domain.repository.PessoaRepository;
@@ -14,6 +16,7 @@ import java.util.List;
 public class PessoaService {
 
     private PessoaRepository pessoaRepository;
+    private PessoaAssembler pessoaAssembler;
 
     @Transactional
     public Pessoa cadastrar(Pessoa pessoa){
@@ -27,25 +30,37 @@ public class PessoaService {
     }
 
     @Transactional
-    public void excluir(Long pessoaId) {
+    public ResponseEntity<Object> excluir(Long pessoaId){
+
+        if(!pessoaRepository.existsById(pessoaId)){
+            return ResponseEntity.notFound().build();
+        }
+
         pessoaRepository.deleteById(pessoaId);
+        return ResponseEntity.ok(pessoaId);
     }
 
-    public Pessoa buscar(Long pessoaId) {
-        return pessoaRepository.findById(pessoaId)
-                .orElseThrow(() -> new NegocioException("Pessoa não encontrada."));
+    public Pessoa buscar(Long pessoaId){
+        return pessoaRepository.findById(pessoaId).orElseThrow(()
+                -> new NegocioException("Pessoa não encontrada."));
     }
 
-    public List<Pessoa> listarNomeContaining(String nomeContaining) {
-        return pessoaRepository.findByNomeContaining(nomeContaining);
+    public ResponseEntity<PessoaModel> procurar(Long pessoaId){
+        return pessoaRepository.findById(pessoaId).map(entrega ->
+                ResponseEntity.ok(pessoaAssembler.toModel(entrega))
+        ).orElse(ResponseEntity.notFound().build());
     }
 
-    public List<Pessoa> listarPorNome(String pessoaNome) {
-        return pessoaRepository.findByNome(pessoaNome);
+    public List<PessoaModel> listarNomeContaining(String nomeContaining) {
+        return pessoaAssembler.toCollectionModel(pessoaRepository.findByNomeContaining(nomeContaining));
     }
 
-    public List<Pessoa> listar() {
-        return pessoaRepository.findAll();
+    public List<PessoaModel> listarPorNome(String pessoaNome) {
+        return pessoaAssembler.toCollectionModel(pessoaRepository.findByNome(pessoaNome));
+    }
+
+    public List<PessoaModel> listar() {
+        return pessoaAssembler.toCollectionModel(pessoaRepository.findAll());
     }
 
     public ResponseEntity<Pessoa> editar(
@@ -62,14 +77,5 @@ public class PessoaService {
         return ResponseEntity.ok(pessoa);
     }
 
-    public ResponseEntity<Pessoa> remover(Long pessoaId){
-
-        if(!pessoaRepository.existsById(pessoaId)) {
-            return ResponseEntity.notFound().build();
-        }
-        excluir(pessoaId);
-
-        return ResponseEntity.noContent().build();
-    }
 
 }
