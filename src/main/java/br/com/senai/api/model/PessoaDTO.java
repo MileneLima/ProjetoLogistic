@@ -7,11 +7,11 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class PessoaModel {
+public class PessoaDTO {
 
-    @NotNull
-    private long id;
     private String nome;
-    private String email;
+
+    private UsuarioDTO usuario;
+
     private String telefone;
 }

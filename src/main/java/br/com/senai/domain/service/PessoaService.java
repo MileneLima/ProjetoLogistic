@@ -1,7 +1,7 @@
 package br.com.senai.domain.service;
 
 import br.com.senai.api.assembler.PessoaAssembler;
-import br.com.senai.api.model.PessoaModel;
+import br.com.senai.api.model.PessoaDTO;
 import br.com.senai.domain.exception.NegocioException;
 import br.com.senai.domain.model.Pessoa;
 import br.com.senai.domain.repository.PessoaRepository;
@@ -20,12 +20,12 @@ public class PessoaService {
 
     @Transactional
     public Pessoa cadastrar(Pessoa pessoa){
-        boolean emailvalidation = pessoaRepository.findByEmail(pessoa.getEmail())
-                .isPresent();
-
-        if(emailvalidation) {
-            throw new NegocioException("Já existe uma pessoa com este e-mail cadastrado.");
-        }
+//        boolean emailvalidation = pessoaRepository.findByEmail(pessoa.getEmail())
+//                .isPresent();
+//
+//        if(emailvalidation) {
+//            throw new NegocioException("Já existe uma pessoa com este e-mail cadastrado.");
+//        }
         return pessoaRepository.save(pessoa);
     }
 
@@ -45,21 +45,21 @@ public class PessoaService {
                 -> new NegocioException("Pessoa não encontrada."));
     }
 
-    public ResponseEntity<PessoaModel> procurar(Long pessoaId){
+    public ResponseEntity<PessoaDTO> procurar(Long pessoaId){
         return pessoaRepository.findById(pessoaId).map(entrega ->
                 ResponseEntity.ok(pessoaAssembler.toModel(entrega))
         ).orElse(ResponseEntity.notFound().build());
     }
 
-    public List<PessoaModel> listarNomeContaining(String nomeContaining) {
+    public List<PessoaDTO> listarNomeContaining(String nomeContaining) {
         return pessoaAssembler.toCollectionModel(pessoaRepository.findByNomeContaining(nomeContaining));
     }
 
-    public List<PessoaModel> listarPorNome(String pessoaNome) {
+    public List<PessoaDTO> listarPorNome(String pessoaNome) {
         return pessoaAssembler.toCollectionModel(pessoaRepository.findByNome(pessoaNome));
     }
 
-    public List<PessoaModel> listar() {
+    public List<PessoaDTO> listar() {
         return pessoaAssembler.toCollectionModel(pessoaRepository.findAll());
     }
 
