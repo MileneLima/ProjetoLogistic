@@ -60,6 +60,7 @@ public class PessoaService {
     }
 
     public List<PessoaDTO> listar() {
+
         return pessoaAssembler.toCollectionModel(pessoaRepository.findAll());
     }
 

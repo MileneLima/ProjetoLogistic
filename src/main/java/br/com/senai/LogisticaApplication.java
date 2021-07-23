@@ -1,9 +1,7 @@
 package br.com.senai;
 
-import br.com.senai.api.controller.PessoaController;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class LogisticaApplication {

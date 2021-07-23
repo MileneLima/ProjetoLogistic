@@ -18,7 +18,6 @@ public class PessoaAssembler {
     private ModelMapper modelMapper;
 
     public PessoaDTO toModel(Pessoa pessoa){
-
         return modelMapper.map(pessoa, PessoaDTO.class);
     }
 

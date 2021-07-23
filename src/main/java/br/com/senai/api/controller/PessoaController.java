@@ -42,6 +42,7 @@ public class PessoaController {
 
     @GetMapping("/{pessoaId}")
     public ResponseEntity<PessoaDTO> procurar(@PathVariable long pessoaId){
+
         return pessoaService.procurar(pessoaId);
     }
 
